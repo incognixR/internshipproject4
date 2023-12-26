@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <style>
+    /* Basic CSS styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #taskInput {
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    .task-item {
+      background-color: #fff;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 300px;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    /* Styling for checkbox */
+    input[type="checkbox"] {
+      transform: scale(1.5);
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Task Manager</h1>
+  <input type="text" id="taskInput" placeholder="Add a new task">
+  <button onclick="addTask()">Add Task</button>
+
+  <div id="taskList"></div>
+
+  <script>
+    // Load tasks from local storage on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTasks();
+    });
+
+    // Add Task Function
+    function addTask() {
+      const taskInput = document.getElementById('taskInput');
+      const taskList = document.getElementById('taskList');
+
+      if (taskInput.value.trim() !== '') {
+        const task = taskInput.value;
+        const taskItem = document.createElement('div');
+        taskItem.className = 'task-item';
+        taskItem.innerHTML = `
+          <input type="checkbox" onchange="toggleTaskCompletion(this)">
+          <span>${task}</span>
+          <button onclick="editTask(this)">Edit</button>
+          <button onclick="deleteTask(this)">Delete</button>
+        `;
+        taskList.appendChild(taskItem);
+
+        saveTasks(); // Save tasks to local storage
+        taskInput.value = ''; // Clear input field after adding task
+      } else {
+        alert('Please enter a task!');
+      }
+    }
+
+    // Edit Task Function
+    function editTask(element) {
+      const newTask = prompt('Edit task:', element.previousSibling.textContent);
+      if (newTask !== null && newTask.trim() !== '') {
+        element.previousSibling.textContent = newTask;
+        saveTasks();
+      }
+    }
+
+    // Delete Task Function
+    function deleteTask(element) {
+      element.parentNode.remove();
+      saveTasks();
+    }
+
+    // Toggle Task Completion Function
+    function toggleTaskCompletion(element) {
+      const taskText = element.nextElementSibling;
+      taskText.classList.toggle('completed');
+      saveTasks();
+    }
+
+    // Save Tasks to Local Storage Function
+    function saveTasks() {
+      const tasks = document.querySelectorAll('.task-item span');
+      const tasksArray = Array.from(tasks).map(task => task.textContent);
+      localStorage.setItem('tasks', JSON.stringify(tasksArray));
+    }
+
+    // Load Tasks from Local Storage Function
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks'));
+      if (tasks) {
+        const taskList = document.getElementById('taskList');
+        tasks.forEach(task => {
+          const taskItem = document.createElement('div');
+          taskItem.className = 'task-item';
+          taskItem.innerHTML = `
+            <input type="checkbox" onchange="toggleTaskCompletion(this)">
+            <span>${task}</span>
+            <button onclick="editTask(this)">Edit</button>
+            <button onclick="deleteTask(this)">Delete</button>
+          `;
+          taskList.appendChild(taskItem);
+        });
+      }
+    }
+  </script>
+
+</body>
+</html>
